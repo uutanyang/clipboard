@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 允许访问剪贴板 -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>贴立方需要访问剪贴板以监听和管理您的剪贴板历史记录</string>
+
+    <!-- 允许网络访问 (用于局域网同步) -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <key>NSLocalNetworkUsageDescription</key>
+        <string>贴立方需要访问本地网络以在局域网内同步剪贴板和传输文件</string>
+    </dict>
+
+    <!-- 允许使用 mDNS 服务发现 -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_tie-lifang._tcp</string>
+    </array>
+
+    <!-- 允许使用本地网络 (用于设备发现和文件传输) -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>贴立方需要访问本地网络以发现附近设备并同步剪贴板内容</string>
+
+    <!-- 允许文件访问 (用于保存图片和接收文件) -->
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>贴立方需要访问文档文件夹以保存和管理文件</string>
+
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>贴立方需要访问下载文件夹以保存接收的文件和图片</string>
+
+    <!-- 硬件加速 -->
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+
+    <!-- 允许应用在后台运行 (用于剪贴板监听和同步) -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>processing</string>
+    </array>
+
+    <!-- 自动启动权限 -->
+    <key>SMLoginItemEnabled</key>
+    <false/>
+</dict>
+</plist>

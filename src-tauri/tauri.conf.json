@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "贴立方",
+  "version": "0.1.0",
+  "identifier": "com.yangtanfang.tie-lifang",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1421",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "贴立方",
+        "width": 500,
+        "minWidth": 450,
+        "height": 600,
+        "resizable": true,
+        "center": true,
+        "decorations": true,
+        "transparent": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": false,
+        "visible": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost http://asset.localhost http://127.0.0.1:* data: blob:; style-src 'self' 'unsafe-inline'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "entitlements": "entitlements.plist",
+      "entitlements": null,
+      "frameworks": [],
+      "exceptionDomain": "",
+      "signingIdentity": null,
+      "providerShortName": null,
+      "hardenedRuntime": true
+    },
+    "publisher": "Yang Tanfang",
+    "copyright": "Copyright © 2026 Yang Tanfang. All rights reserved.",
+    "category": "Productivity",
+    "shortDescription": "现代化的剪贴板管理工具",
+    "longDescription": "贴立方是一款现代化的剪贴板管理工具，支持文本和图片记录、局域网同步、文件传输等功能，让剪贴板管理更简单高效。",
+    "license": "MIT",
+    "licenseFile": "../LICENSE"
+  },
+  "plugins": {}
+}

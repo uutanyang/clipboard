@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试剪贴板图片</title>
+</head>
+<body>
+    <h1>测试剪贴板图片格式检测</h1>
+    <button onclick="testClipboard()">测试剪贴板</button>
+    <div id="result"></div>
+
+    <script>
+        async function testClipboard() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p>正在读取剪贴板...</p>';
+
+            try {
+                const clipboardItems = await navigator.clipboard.read();
+                let output = '<h3>剪贴板内容:</h3>';
+
+                for (const item of clipboardItems) {
+                    output += '<p>Types: ' + item.types.join(', ') + '</p>';
+
+                    for (const type of item.types) {
+                        if (type.startsWith('image/')) {
+                            const blob = await item.getType(type);
+                            output += `<p>${type}: ${blob.size} bytes, MIME: ${blob.type}</p>`;
+
+                            // 尝试显示图片
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.style.maxWidth = '400px';
+                                img.style.border = '1px solid #ccc';
+                                img.style.margin = '10px 0';
+                                result.appendChild(img);
+                            };
+                            reader.readAsDataURL(blob);
+                        }
+                    }
+                }
+
+                result.innerHTML = output;
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
