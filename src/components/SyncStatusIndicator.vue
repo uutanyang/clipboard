@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 
-type SyncStatus = 'disconnected' | 'connected' | 'syncing'
+type SyncStatus = 'server_off' | 'server_on' | 'connected' | 'syncing'
 
 interface ClipboardSyncedEvent {
   device_id: string
@@ -10,7 +10,7 @@ interface ClipboardSyncedEvent {
   errors: string[]
 }
 
-const status = ref<SyncStatus>('disconnected')
+const status = ref<SyncStatus>('server_off')
 const connectedDeviceCount = ref(0)
 const lastSyncTime = ref<Date | null>(null)
 const lastSyncDevice = ref<string | null>(null)
@@ -21,12 +21,12 @@ let animationTimeout: number | null = null
 // 状态文本
 const statusText = computed(() => {
   switch (status.value) {
-    case 'disconnected':
-      return '未连接'
+    case 'server_off':
+      return '服务未开启'
+    case 'server_on':
+      return '服务已开启'
     case 'connected':
-      return connectedDeviceCount.value > 0
-        ? `已连接 ${connectedDeviceCount.value} 台设备`
-        : '未连接'
+      return `已连接 ${connectedDeviceCount.value} 台设备`
     case 'syncing':
       return '同步中...'
   }
@@ -35,8 +35,10 @@ const statusText = computed(() => {
 // 状态颜色
 const statusColor = computed(() => {
   switch (status.value) {
-    case 'disconnected':
+    case 'server_off':
       return '#8e8e93'
+    case 'server_on':
+      return '#ff9500'
     case 'connected':
       return '#34c759'
     case 'syncing':
@@ -47,8 +49,10 @@ const statusColor = computed(() => {
 // 背景颜色
 const bgColor = computed(() => {
   switch (status.value) {
-    case 'disconnected':
+    case 'server_off':
       return 'rgba(142, 142, 147, 0.1)'
+    case 'server_on':
+      return 'rgba(255, 149, 0, 0.1)'
     case 'connected':
       return 'rgba(52, 199, 89, 0.1)'
     case 'syncing':
@@ -85,17 +89,20 @@ function triggerSyncAnimation() {
 
   animationTimeout = window.setTimeout(() => {
     isAnimating.value = false
-    status.value = connectedDeviceCount.value > 0 ? 'connected' : 'disconnected'
+    status.value = connectedDeviceCount.value > 0 ? 'connected' : 'server_on'
   }, 2000)
 }
 
-// 更新连接设备数
-function updateConnectedCount(count: number) {
+// 更新连接设备数和服务器状态
+function updateConnectedCount(count: number, isServerRunning: boolean = true) {
   connectedDeviceCount.value = count
-  if (status.value === 'disconnected' && count > 0) {
+
+  if (!isServerRunning) {
+    status.value = 'server_off'
+  } else if (count > 0) {
     status.value = 'connected'
-  } else if (status.value === 'connected' && count === 0) {
-    status.value = 'disconnected'
+  } else {
+    status.value = 'server_on'
   }
 }
 
@@ -146,7 +153,8 @@ defineExpose({
       <div
         class="status-dot"
         :class="{
-          'disconnected': status === 'disconnected',
+          'server-off': status === 'server_off',
+          'server-on': status === 'server_on',
           'connected': status === 'connected',
           'syncing': isAnimating
         }"
@@ -204,8 +212,13 @@ defineExpose({
   transition: all 0.3s ease;
 }
 
-.status-dot.disconnected {
+.status-dot.server-off {
   background: #8e8e93;
+}
+
+.status-dot.server-on {
+  background: #ff9500;
+  box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
 }
 
 .status-dot.connected {

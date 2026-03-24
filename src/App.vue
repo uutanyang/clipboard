@@ -634,6 +634,10 @@ const filteredItems = computed(() => {
 // 更新连接设备数量
 async function updateConnectedCount() {
   try {
+    // 获取服务器状态
+    const serverStatusResult = await invoke<ServerStatus>('get_server_status')
+    const isServerRunning = serverStatusResult.is_running
+
     const trustedDevices = await invoke<any[]>('get_trusted_devices')
 
     // 检查在线状态（最近30秒内活跃视为在线）
@@ -646,7 +650,7 @@ async function updateConnectedCount() {
     }).length
 
     if (syncIndicator.value) {
-      syncIndicator.value.updateConnectedCount(onlineCount)
+      syncIndicator.value.updateConnectedCount(onlineCount, isServerRunning)
     }
   } catch (error) {
     console.error('Failed to update connected count:', error)
