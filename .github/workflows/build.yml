@@ -19,10 +19,10 @@ jobs:
       matrix:
         include:
           - platform: macos-latest
-            args: --target universal-apple-darwin --bundles app
+            args: --target universal-apple-darwin --bundles dmg
             rust-targets: x86_64-apple-darwin,aarch64-apple-darwin
           - platform: windows-latest
-            args: --bundles msi
+            args: --bundles nsis
             rust-targets: ''
           - platform: ubuntu-22.04
             args: --bundles deb,appimage
@@ -46,6 +46,10 @@ jobs:
 
       - uses: swatinem/rust-cache@v2
 
+      - name: Install create-dmg (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: brew install create-dmg
+
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
@@ -60,17 +64,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: '贴立方 ${{ github.ref_name }}'
-          releaseBody: |
-            ## 贴立方 ${{ github.ref_name }}
-
-            ### 功能
-            - Tab 分类（全部/文本/图片）
-            - 图片点击用系统默认应用打开
-            - 列表按时间倒序排列
-            - 自动启动 mDNS 设备发现服务
-
-            ### 支持
-            macOS (Intel/Apple Silicon), Windows, Linux
+          releaseBody: 'See release notes'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
@@ -80,7 +74,6 @@ jobs:
         with:
           name: build-${{ matrix.platform }}
           path: |
-            src-tauri/target/**/bundle/**/*.app
             src-tauri/target/**/bundle/**/*.dmg
             src-tauri/target/**/bundle/**/*.msi
             src-tauri/target/**/bundle/**/*.exe
@@ -121,10 +114,4 @@ jobs:
             macOS (Intel/Apple Silicon), Windows, Linux
           draft: true
           prerelease: false
-          files: |
-            artifacts/**/*.app
-            artifacts/**/*.dmg
-            artifacts/**/*.msi
-            artifacts/**/*.exe
-            artifacts/**/*.deb
-            artifacts/**/*.AppImage
+          files: artifacts/**
