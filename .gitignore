@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+instance1
+instance2
+scripts
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +25,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.md
+*.sh
