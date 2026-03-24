@@ -47,21 +47,22 @@ jobs:
         with:
           tagName: ${{ github.ref_name || github.event.inputs.version }}
           releaseName: '贴立方 ${{ github.ref_name || github.event.inputs.version }}'
-          releaseBody: '## 更新内容
-
-### 新功能
-- Tab 分类功能（全部/文本/图片）
-- 图片点击使用系统默认应用打开
-- 列表按时间倒序排列
-- 自动启动 mDNS 设备发现服务
-- 托盘菜单优化
-
-### 修复
-- 修复托盘退出功能无效的问题
-- 修复设备管理、文件传输菜单无法打开窗口的问题
-
----
-**支持平台**: macOS (Intel/Apple Silicon), Windows, Linux'
+          releaseBody: |
+            ## 更新内容
+            
+            ### 新功能
+            - Tab 分类功能（全部/文本/图片）
+            - 图片点击使用系统默认应用打开
+            - 列表按时间倒序排列
+            - 自动启动 mDNS 设备发现服务
+            - 托盘菜单优化
+            
+            ### 修复
+            - 修复托盘退出功能无效的问题
+            - 修复设备管理、文件传输菜单无法打开窗口的问题
+            
+            ---
+            **支持平台**: macOS (Intel/Apple Silicon), Windows, Linux
           releaseDraft: true
           prerelease: false
           args: --target universal-apple-darwin
