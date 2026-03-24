@@ -66,6 +66,26 @@ const privacyPolicy = ref<InstanceType<typeof PrivacyPolicy> | null>(null)
 const welcomeGuide = ref<InstanceType<typeof WelcomeGuide> | null>(null)
 const updateChecker = ref<InstanceType<typeof UpdateChecker> | null>(null)
 
+// 应用版本
+const appVersion = ref('1.0.0')
+
+// 获取应用版本
+async function fetchAppVersion() {
+  try {
+    const { getVersion } = await import('@tauri-apps/api/app')
+    appVersion.value = await getVersion()
+  } catch (error) {
+    console.error('获取版本失败:', error)
+  }
+}
+
+// 检查更新
+async function checkForUpdate() {
+  if (updateChecker.value) {
+    await updateChecker.value.checkForUpdate()
+  }
+}
+
 // 事件监听器
 let unlistenClipboard: UnlistenFn | null = null
 let unlistenPairAccepted: UnlistenFn | null = null
@@ -737,12 +757,13 @@ onMounted(async () => {
     darkMode.value = savedDarkMode === 'true'
   }
   applyDarkMode()
-  
+
   const savedHistoryLimit = localStorage.getItem('historyLimit')
   if (savedHistoryLimit) {
     historyLimit.value = parseInt(savedHistoryLimit)
   }
-  
+
+  await fetchAppVersion()
   await fetchServerPort()
   await fetchServerStatus()
   await fetchCustomPort()
@@ -1150,9 +1171,9 @@ onUnmounted(() => {
             <div class="setting-item">
               <div class="setting-info">
                 <div class="setting-title">检查更新</div>
-                <div class="setting-desc">检查是否有新版本可用</div>
+                <div class="setting-desc">当前版本: v{{ appVersion }}</div>
               </div>
-              <button @click="updateChecker?.checkForUpdate()" class="action-btn">
+              <button @click="checkForUpdate" class="action-btn">
                 检查
               </button>
             </div>

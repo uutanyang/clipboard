@@ -84,7 +84,7 @@ defineExpose({
             <p>如果您对本隐私政策有任何疑问或建议，请通过以下方式联系我们：</p>
             <ul>
               <li>邮箱：uutan@qq.com</li>
-              <li>GitHub：https://github.com/uutanyang/tie-lifang/issues</li>
+              <li>GitHub：https://github.com/uutanyang/clipboard/issues</li>
             </ul>
 
             <div class="policy-footer">

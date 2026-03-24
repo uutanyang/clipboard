@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { check } from '@tauri-apps/plugin-updater'
 import { relaunch } from '@tauri-apps/plugin-process'
+import { getVersion } from '@tauri-apps/api/app'
 
 interface UpdateInfo {
   version: string
@@ -11,22 +12,35 @@ interface UpdateInfo {
 }
 
 const showUpdateDialog = ref(false)
+const showNoUpdateDialog = ref(false)
 const updateInfo = ref<UpdateInfo | null>(null)
+const currentVersion = ref('')
 const isDownloading = ref(false)
 const downloadProgress = ref(0)
 const isInstalling = ref(false)
 const errorMessage = ref('')
 const lastCheckTime = ref<number | null>(null)
 
+// 获取当前版本
+async function fetchCurrentVersion() {
+  try {
+    currentVersion.value = await getVersion()
+  } catch (error) {
+    console.error('获取版本失败:', error)
+    currentVersion.value = '1.0.0'
+  }
+}
+
 // 检查更新
 async function checkForUpdate(silent = false) {
   try {
     errorMessage.value = ''
-    
+    showNoUpdateDialog.value = false
+
     const update = await check()
-    
+
     lastCheckTime.value = Date.now()
-    
+
     if (update) {
       updateInfo.value = {
         version: update.version,
@@ -34,11 +48,15 @@ async function checkForUpdate(silent = false) {
         date: update.date,
         body: update.body
       }
+      currentVersion.value = update.currentVersion
       showUpdateDialog.value = true
       console.log('📦 发现新版本:', update.version)
     } else {
       if (!silent) {
-        alert('当前已是最新版本')
+        showNoUpdateDialog.value = true
+        setTimeout(() => {
+          showNoUpdateDialog.value = false
+        }, 2000)
       }
       console.log('✓ 当前已是最新版本')
     }
@@ -46,6 +64,7 @@ async function checkForUpdate(silent = false) {
     console.error('检查更新失败:', error)
     if (!silent) {
       errorMessage.value = `检查更新失败: ${(error as Error).message}`
+      alert(errorMessage.value)
     }
   }
 }
@@ -127,6 +146,7 @@ function formatBody(body?: string): string {
 
 // 自动检查更新（静默模式）
 onMounted(async () => {
+  await fetchCurrentVersion()
   // 应用启动 5 秒后静默检查更新
   setTimeout(async () => {
     const update = await check()
@@ -137,6 +157,7 @@ onMounted(async () => {
         date: update.date,
         body: update.body
       }
+      currentVersion.value = update.currentVersion
       showUpdateDialog.value = true
     }
   }, 5000)
@@ -144,11 +165,23 @@ onMounted(async () => {
 
 // 暴露方法供外部调用
 defineExpose({
-  checkForUpdate
+  checkForUpdate,
+  currentVersion
 })
 </script>
 
 <template>
+  <!-- 已是最新版本提示 -->
+  <Transition name="toast">
+    <div v-if="showNoUpdateDialog" class="toast-message">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 18a8 8 0 100-16 8 8 0 000 16z"/>
+        <path d="M6 10l3 3 6-6"/>
+      </svg>
+      <span>当前已是最新版本 v{{ currentVersion }}</span>
+    </div>
+  </Transition>
+
   <!-- 更新提示弹窗 -->
   <Transition name="modal">
     <div v-if="showUpdateDialog" class="modal-overlay" @click.self="remindLater">
@@ -221,6 +254,36 @@ defineExpose({
 </template>
 
 <style scoped>
+/* Toast 提示 */
+.toast-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #34c759;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(52, 199, 89, 0.3);
+  z-index: 3000;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px);
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
