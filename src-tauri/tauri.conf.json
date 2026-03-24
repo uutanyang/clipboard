@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "贴立方",
-  "version": "0.1.0",
-  "identifier": "com.yangtanfang.tie-lifang",
+  "productName": "clipboard",
+  "version": "1.0.0",
+  "identifier": "com.yangtanfang.clipboard",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1421",
@@ -46,13 +46,16 @@
     ],
     "macOS": {
       "minimumSystemVersion": "10.15",
-      "entitlements": "entitlements.plist",
       "entitlements": null,
       "frameworks": [],
       "exceptionDomain": "",
       "signingIdentity": null,
       "providerShortName": null,
-      "hardenedRuntime": true
+      "hardenedRuntime": true,
+      "info": {
+        "CFBundleDisplayName": "贴立方",
+        "CFBundleName": "贴立方"
+      }
     },
     "publisher": "Yang Tanfang",
     "copyright": "Copyright © 2026 Yang Tanfang. All rights reserved.",
