@@ -76,6 +76,27 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
 
+      - name: Fix macOS app display name
+        if: matrix.platform == 'macos-latest'
+        run: |
+          chmod +x scripts/fix-macos-name.sh
+          for app in src-tauri/target/*/bundle/macos/*.app; do
+            if [ -d "$app" ]; then
+              ./scripts/fix-macos-name.sh "$app"
+            fi
+          done
+          # 重新创建 DMG
+          for dmg in src-tauri/target/*/bundle/dmg/*.dmg; do
+            if [ -f "$dmg" ]; then
+              rm -f "$dmg"
+              app_name=$(basename "$dmg" .dmg)
+              app_path=$(find src-tauri/target/*/bundle/macos -name "*.app" | head -1)
+              if [ -n "$app_path" ]; then
+                create-dmg --volname "贴立方" --app-drop-link 0 "$dmg" "$app_path" || true
+              fi
+            fi
+          done
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
