@@ -1406,11 +1406,12 @@ pub fn run() {
 
             // 自动启动 mDNS 发现服务
             let mdns_handle = handle.clone();
-            let mdns_state = app.state::<AppState>().clone();
             tauri::async_runtime::spawn(async move {
                 // 等待服务器状态就绪
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
+                // 在 async 块内获取状态
+                let mdns_state = mdns_handle.state::<AppState>();
                 let server_state = mdns_state.server_state.lock().unwrap();
                 if let Some(ref state) = *server_state {
                     println!("🔄 Auto-starting mDNS discovery...");
@@ -1432,7 +1433,8 @@ pub fn run() {
                     }
 
                     // 开始浏览
-                    if let Err(e) = mdns.start_browsing(mdns_handle) {
+                    let handle_for_browsing = mdns_handle.clone();
+                    if let Err(e) = mdns.start_browsing(handle_for_browsing) {
                         eprintln!("Failed to start mDNS browsing: {}", e);
                         return;
                     }
