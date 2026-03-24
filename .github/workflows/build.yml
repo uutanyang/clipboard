@@ -19,13 +19,13 @@ jobs:
       matrix:
         include:
           - platform: macos-latest
-            target: universal-apple-darwin
+            args: --target universal-apple-darwin
             rust-targets: x86_64-apple-darwin,aarch64-apple-darwin
           - platform: windows-latest
-            target: ''
+            args: ''
             rust-targets: ''
           - platform: ubuntu-22.04
-            target: ''
+            args: ''
             rust-targets: ''
 
     runs-on: ${{ matrix.platform }}
@@ -73,4 +73,4 @@ jobs:
             macOS (Intel/Apple Silicon), Windows, Linux
           releaseDraft: true
           prerelease: false
-          args: ${{ format('--target {0}', matrix.target) }}
+          args: ${{ matrix.args }}
