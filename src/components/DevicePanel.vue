@@ -208,10 +208,23 @@ async function setupEventListeners() {
   }
 }
 
+// 加载已发现的设备列表
+async function loadDiscoveredDevices() {
+  try {
+    const result = await invoke<NetworkDevice[]>('get_discovered_devices')
+    devices.value = result
+    emit('devices-changed', devices.value.length)
+    console.log('📋 Loaded discovered devices:', result.length)
+  } catch (error) {
+    console.error('Failed to load discovered devices:', error)
+  }
+}
+
 onMounted(async () => {
   await loadTrustedDevices()
   await loadPairings()
   await setupEventListeners()
+  await loadDiscoveredDevices()
 })
 
 onUnmounted(() => {

@@ -1404,6 +1404,46 @@ pub fn run() {
                 app.state::<AppState>().mdns.clone(),
             );
 
+            // 自动启动 mDNS 发现服务
+            let mdns_handle = handle.clone();
+            let mdns_state = app.state::<AppState>().clone();
+            tauri::async_runtime::spawn(async move {
+                // 等待服务器状态就绪
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+                let server_state = mdns_state.server_state.lock().unwrap();
+                if let Some(ref state) = *server_state {
+                    println!("🔄 Auto-starting mDNS discovery...");
+                    let device_id = mdns_state.device_info.get_or_create_device_id().unwrap();
+
+                    // 创建 mDNS 发现实例
+                    let mdns = match discovery::MdnsDiscovery::with_server_state(state.clone()) {
+                        Ok(m) => m,
+                        Err(e) => {
+                            eprintln!("Failed to create mDNS discovery: {}", e);
+                            return;
+                        }
+                    };
+
+                    // 注册服务
+                    if let Err(e) = mdns.register_service(mdns_handle.clone(), device_id) {
+                        eprintln!("Failed to register mDNS service: {}", e);
+                        return;
+                    }
+
+                    // 开始浏览
+                    if let Err(e) = mdns.start_browsing(mdns_handle) {
+                        eprintln!("Failed to start mDNS browsing: {}", e);
+                        return;
+                    }
+
+                    // 保存 mDNS 实例
+                    let mut mdns_guard = mdns_state.mdns.lock().unwrap();
+                    *mdns_guard = Some(mdns);
+                    println!("✓ mDNS discovery started automatically");
+                }
+            });
+
             // 设置全局快捷键 (Command/Ctrl + Shift + V)
             #[cfg(not(target_os = "macos"))]
             {

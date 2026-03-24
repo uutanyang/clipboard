@@ -5,7 +5,7 @@ use super::*;
 use mdns_sd::{ServiceDaemon, ServiceEvent, ServiceInfo};
 use std::collections::HashMap;
 
-const SERVICE_TYPE: &str = "_clip_sync._tcp.local.";
+const SERVICE_TYPE: &str = "_tie-lifang._tcp.local.";
 const DEFAULT_SERVICE_PORT: u16 = 54321;
 
 /// mDNS 发现管理器
