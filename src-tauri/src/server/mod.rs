@@ -637,11 +637,15 @@ fn sanitize_filename(filename: &str) -> String {
 }
 
 /// GET /images/{filename} - 静态图片文件服务
-async fn serve_image(Path(filename): Path<String>) -> impl IntoResponse {
-    // 获取应用数据目录
-    let app_data_dir = match dirs::data_local_dir() {
-        Some(dir) => dir.join("com.yangtanfang.tie-lifang"),
-        None => {
+async fn serve_image(
+    State(state): State<ServerState>,
+    Path(filename): Path<String>
+) -> impl IntoResponse {
+    // 使用与 save_image_to_app_data 相同的路径获取方式
+    let app_data_dir = match state.app_handle.path().app_data_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            println!("❌ Failed to get app data directory: {}", e);
             return Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Failed to get app data directory"))

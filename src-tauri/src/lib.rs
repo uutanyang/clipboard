@@ -1039,7 +1039,7 @@ async fn send_file_to_device(
             let devices = mdns.get_devices();
             devices
                 .iter()
-                .find(|d| d.hostname == device_id)
+                .find(|d| d.device_id == device_id)
                 .ok_or_else(|| format!("Target device not found: {}", device_id))?
                 .clone()
         } else {

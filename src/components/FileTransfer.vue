@@ -5,6 +5,7 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 
 interface NetworkDevice {
+  device_id: string
   name: string
   hostname: string
   ip: string
@@ -131,7 +132,7 @@ async function selectFile() {
 async function sendFileToDevice(deviceId: string) {
   if (!selectedFile.value) return
 
-  const device = devices.value.find(d => d.hostname === deviceId)
+  const device = devices.value.find(d => d.device_id === deviceId)
   if (!device) {
     console.error('Device not found:', deviceId)
     alert('未找到目标设备')
@@ -222,7 +223,7 @@ function getProgressPercentage(transfer: TransferProgress): number {
 const availableDevices = computed(() => {
   return devices.value.filter(device => {
     const isOnline = getOnlineStatus(device.last_seen)
-    const isPaired = trustedDevices.value.some(d => d.device_id === device.hostname)
+    const isPaired = trustedDevices.value.some(d => d.device_id === device.device_id)
     return isOnline && isPaired
   })
 })
@@ -402,9 +403,9 @@ onUnmounted(() => {
             <div v-else class="device-list">
               <div
                 v-for="device in availableDevices"
-                :key="device.hostname"
+                :key="device.device_id"
                 class="device-item"
-                @click="sendFileToDevice(device.hostname)"
+                @click="sendFileToDevice(device.device_id)"
               >
                 <div class="device-info">
                   <div class="device-name">{{ device.name }}</div>
