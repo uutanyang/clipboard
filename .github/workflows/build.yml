@@ -73,4 +73,4 @@ jobs:
             macOS (Intel/Apple Silicon), Windows, Linux
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.target != '' && format('--target {0}', matrix.target) }}
+          args: ${{ format('--target {0}', matrix.target) }}
