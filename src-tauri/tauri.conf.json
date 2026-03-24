@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "clipboard",
+  "productName": "贴立方",
   "version": "1.0.0",
   "identifier": "com.yangtanfang.clipboard",
   "build": {
@@ -47,8 +47,8 @@
     "macOS": {
       "minimumSystemVersion": "10.15"
     },
-    "publisher": "Yang Tanfang",
-    "copyright": "Copyright © 2026 Yang Tanfang. All rights reserved.",
+    "publisher": "武汉草果科技有限公司",
+    "copyright": "Copyright © 2026 武汉草果科技有限公司. All rights reserved.",
     "category": "Productivity",
     "shortDescription": "现代化的剪贴板管理工具",
     "longDescription": "贴立方是一款现代化的剪贴板管理工具，支持文本和图片记录、局域网同步、文件传输等功能，让剪贴板管理更简单高效。",
