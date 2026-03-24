@@ -16,6 +16,7 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  NODE_OPTIONS: --no-warnings
 
 jobs:
   # ==================== macOS Build (Universal) ====================
@@ -45,6 +46,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_NO_WARNINGS: 1
         with:
           tagName: ${{ github.ref_name || inputs.version }}
           releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
@@ -94,6 +96,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_NO_WARNINGS: 1
         with:
           tagName: ${{ github.ref_name || inputs.version }}
           releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
@@ -137,6 +140,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_NO_WARNINGS: 1
         with:
           tagName: ${{ github.ref_name || inputs.version }}
           releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
