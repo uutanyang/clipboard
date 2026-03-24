@@ -59,10 +59,7 @@
       "endpoints": [
         "https://github.com/uutanyang/clipboard/releases/latest/download/{{target}}-{{arch}}.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFDMDY3QjhDRDY3OUYzNkYKUldSdjgzbldqSHNHckNMME1MT3ZBejhvZUJ4bW1MTVczemgxNGNUYmhUYmxrR0gwZGRuKytVRjAK",
-      "windows": {
-        "installMode": ["passive", "basicUi"]
-      }
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFDMDY3QjhDRDY3OUYzNkYKUldSdjgzbldqSHNHckNMME1MT3ZBejhvZUJ4bW1MTVczemgxNGNUYmhUYmxrR0gwZGRuKytVRjAK"
     }
   }
 }
