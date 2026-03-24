@@ -19,14 +19,21 @@ jobs:
       matrix:
         include:
           - platform: macos-latest
-            args: --target universal-apple-darwin --bundles dmg
-            rust-targets: x86_64-apple-darwin,aarch64-apple-darwin
+            args: --target aarch64-apple-darwin --bundles dmg
+            rust-targets: aarch64-apple-darwin
+            artifact-name: macos-aarch64
+          - platform: macos-latest
+            args: --target x86_64-apple-darwin --bundles dmg
+            rust-targets: x86_64-apple-darwin
+            artifact-name: macos-x64
           - platform: windows-latest
             args: --bundles nsis
             rust-targets: ''
+            artifact-name: windows
           - platform: ubuntu-22.04
             args: --bundles deb,appimage
             rust-targets: ''
+            artifact-name: linux
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -72,7 +79,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.platform }}
+          name: build-${{ matrix.artifact-name }}
           path: |
             src-tauri/target/**/bundle/**/*.dmg
             src-tauri/target/**/bundle/**/*.msi
