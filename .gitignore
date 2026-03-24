@@ -14,6 +14,12 @@ dist-ssr
 instance1
 instance2
 scripts
+src-tauri
+.vscode
+.github
+.codeartsdoer
+
+clipboard.db
 
 # Editor directories and files
 .vscode/*
