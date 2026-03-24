@@ -385,27 +385,20 @@ async function restartServer() {
   }
 }
 
-// 复制文本或图片到剪贴板
+// 复制文本或打开图片
 async function copyText(item: ClipboardItem) {
   try {
     if (item.content_type === 'image' && item.file_path) {
-      // 图片：从 HTTP URL 读取并复制到剪贴板
+      // 图片：使用系统默认应用打开
       const filename = item.file_path.split('/').pop() || item.file_path.split('\\').pop()
-      const imageUrl = `http://127.0.0.1:${serverPort.value}/images/${filename}`
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
-
-      // 使用 image/png 格式复制
-      const clipboardItem = new ClipboardItem({ 'image/png': blob })
-      await navigator.clipboard.write([clipboardItem])
-      console.log('✓ 图片已复制到剪贴板')
+      await invoke('open_image_file', { filename })
     } else {
       // 文本：使用 Rust invoke
       await invoke('copy_text', { text: item.content })
+      await hideWindow()
     }
-    await hideWindow()
   } catch (error) {
-    console.error('Failed to copy:', error)
+    console.error('Failed to handle item:', error)
   }
 }
 

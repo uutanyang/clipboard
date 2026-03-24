@@ -123,7 +123,7 @@ mod database {
 
         pub fn get_all_items(&self) -> SqlResult<Vec<ClipboardItem>> {
             let mut stmt = self.conn.prepare(
-                "SELECT id, content_type, content, file_path, created_at, COALESCE(favorite, 0) FROM clipboard_items ORDER BY favorite DESC, created_at DESC LIMIT 100"
+                "SELECT id, content_type, content, file_path, created_at, COALESCE(favorite, 0) FROM clipboard_items ORDER BY created_at DESC LIMIT 100"
             )?;
             let item_iter = stmt.query_map([], |row| {
                 Ok(ClipboardItem {
@@ -146,7 +146,7 @@ mod database {
         pub fn search_items(&self, query: &str) -> SqlResult<Vec<ClipboardItem>> {
             let mut stmt = self.conn.prepare(
                 "SELECT id, content_type, content, file_path, created_at, COALESCE(favorite, 0) FROM clipboard_items
-                 WHERE content_type = 'text' AND content LIKE ?1 ORDER BY favorite DESC, created_at DESC LIMIT 100"
+                 WHERE content_type = 'text' AND content LIKE ?1 ORDER BY created_at DESC LIMIT 100"
             )?;
             let search_pattern = format!("%{}%", query);
             let item_iter = stmt.query_map([&search_pattern], |row| {
@@ -1126,6 +1126,29 @@ async fn open_images_directory(app_handle: AppHandle) -> Result<String, String> 
     Ok(images_dir.to_string_lossy().to_string())
 }
 
+// Tauri 命令：使用系统默认应用打开图片
+#[tauri::command]
+async fn open_image_file(app_handle: AppHandle, filename: String) -> Result<(), String> {
+    // 获取应用数据目录
+    let app_data_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+
+    let image_path = app_data_dir.join("images").join(&filename);
+    
+    // 检查文件是否存在
+    if !image_path.exists() {
+        return Err(format!("Image file not found: {}", filename));
+    }
+
+    // 使用系统默认应用打开图片
+    opener::open(&image_path)
+        .map_err(|e| format!("Failed to open image file: {}", e))?;
+
+    Ok(())
+}
+
 #[tauri::command]
 async fn save_image_to_file(base64_data: String, filename: Option<String>) -> Result<String, String> {
     use base64::{Engine as _, engine::general_purpose::STANDARD};
@@ -1315,6 +1338,7 @@ pub fn run() {
             get_download_directory,
             open_download_directory,
             open_images_directory,
+            open_image_file,
             save_image_to_file,
             clear_hash_cache,
             get_image_base64
@@ -1454,28 +1478,31 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .tooltip("贴立方")
                 .on_menu_event(move |app_handle, event| {
-                    let window = app_handle.get_webview_window("main");
-                    if let Some(window) = window {
-                        match event.id.as_ref() {
-                            "打开" => {
+                    match event.id.as_ref() {
+                        "打开" => {
+                            if let Some(window) = app_handle.get_webview_window("main") {
                                 let _ = window.show();
                                 let _ = window.set_focus();
                             }
-                            "设备管理" => {
+                        }
+                        "设备管理" => {
+                            if let Some(window) = app_handle.get_webview_window("main") {
                                 let _ = window.show();
                                 let _ = window.set_focus();
                                 let _ = window.emit("open-devices", ());
                             }
-                            "文件传输" => {
+                        }
+                        "文件传输" => {
+                            if let Some(window) = app_handle.get_webview_window("main") {
                                 let _ = window.show();
                                 let _ = window.set_focus();
                                 let _ = window.emit("open-file-transfer", ());
                             }
-                            "退出" => {
-                                app_handle.exit(0);
-                            }
-                            _ => {}
                         }
+                        "退出" => {
+                            app_handle.exit(0);
+                        }
+                        _ => {}
                     }
                 })
                 .on_tray_icon_event(move |_tray_id, event| {
