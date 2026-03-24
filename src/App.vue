@@ -11,6 +11,7 @@ import FileTransfer from './components/FileTransfer.vue'
 import PairRequestDialog from './components/PairRequestDialog.vue'
 import PrivacyPolicy from './components/PrivacyPolicy.vue'
 import WelcomeGuide from './components/WelcomeGuide.vue'
+import UpdateChecker from './components/UpdateChecker.vue'
 
 // 模态对话框状态
 const showDevices = ref(false)
@@ -63,6 +64,7 @@ const activeTab = ref<'all' | 'text' | 'image'>('all')
 const syncIndicator = ref<InstanceType<typeof SyncStatusIndicator> | null>(null)
 const privacyPolicy = ref<InstanceType<typeof PrivacyPolicy> | null>(null)
 const welcomeGuide = ref<InstanceType<typeof WelcomeGuide> | null>(null)
+const updateChecker = ref<InstanceType<typeof UpdateChecker> | null>(null)
 
 // 事件监听器
 let unlistenClipboard: UnlistenFn | null = null
@@ -1139,6 +1141,17 @@ onUnmounted(() => {
                 导出
               </button>
             </div>
+            
+            <!-- 检查更新 -->
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-title">检查更新</div>
+                <div class="setting-desc">检查是否有新版本可用</div>
+              </div>
+              <button @click="updateChecker?.checkForUpdate()" class="action-btn">
+                检查
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1152,6 +1165,9 @@ onUnmounted(() => {
 
     <!-- 欢迎引导 -->
     <WelcomeGuide ref="welcomeGuide" />
+
+    <!-- 更新检查 -->
+    <UpdateChecker ref="updateChecker" />
 
     <!-- 清空确认弹窗 -->
     <Transition name="modal">

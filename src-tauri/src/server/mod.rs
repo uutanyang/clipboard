@@ -47,7 +47,7 @@ impl ServerConfig {
                     .unwrap_or(9527);
                 
                 // 验证端口范围
-                let base_port = if base_port >= 1024 && base_port <= 65535 {
+                let base_port = if base_port >= 1024 {
                     base_port
                 } else {
                     9527
@@ -98,7 +98,7 @@ impl ServerConfig {
     /// 设置基础端口
     pub fn set_base_port(&mut self, port: u16) {
         // 验证端口范围
-        if port >= 1024 && port <= 65535 {
+        if port >= 1024 {
             self.base_port = port;
         }
     }

@@ -54,5 +54,15 @@
     "longDescription": "贴立方是一款现代化的剪贴板管理工具，支持文本和图片记录、局域网同步、文件传输等功能，让剪贴板管理更简单高效。",
     "license": "MIT"
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/uutanyang/clipboard/releases/latest/download/{{target}}-{{arch}}.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFDMDY3QjhDRDY3OUYzNkYKUldSdjgzbldqSHNHckNMME1MT3ZBejhvZUJ4bW1MTVczemgxNGNUYmhUYmxrR0gwZGRuKytVRjAK",
+      "windows": {
+        "installMode": ["passive", "basicUi"]
+      }
+    }
+  }
 }

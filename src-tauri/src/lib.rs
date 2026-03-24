@@ -641,7 +641,7 @@ async fn get_server_config_port() -> Result<u16, String> {
 #[tauri::command]
 async fn set_server_config_port(port: u16) -> Result<(), String> {
     // 验证端口范围
-    if port < 1024 || port > 65535 {
+    if port < 1024 {
         return Err("端口范围必须在 1024-65535 之间".to_string());
     }
     
@@ -1301,6 +1301,8 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             get_all_items,
