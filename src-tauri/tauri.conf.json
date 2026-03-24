@@ -45,17 +45,7 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "minimumSystemVersion": "10.15",
-      "entitlements": null,
-      "frameworks": [],
-      "exceptionDomain": "",
-      "signingIdentity": null,
-      "providerShortName": null,
-      "hardenedRuntime": true,
-      "info": {
-        "CFBundleDisplayName": "贴立方",
-        "CFBundleName": "贴立方"
-      }
+      "minimumSystemVersion": "10.15"
     },
     "publisher": "Yang Tanfang",
     "copyright": "Copyright © 2026 Yang Tanfang. All rights reserved.",
