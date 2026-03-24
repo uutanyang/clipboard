@@ -17,6 +17,7 @@ pub struct ClipboardItem {
 // 局域网设备数据结构
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NetworkDevice {
+    pub device_id: String,
     pub name: String,
     pub hostname: String,
     pub ip: String,
@@ -529,6 +530,9 @@ async fn start_mdns_discovery(
         return Err("mDNS discovery already started".to_string());
     }
 
+    // 获取 device_id
+    let device_id = state.device_info.get_or_create_device_id()?;
+
     // 获取服务器状态
     let server_state = state.server_state.lock()
         .map_err(|e| format!("Failed to acquire server state lock: {}", e))?;
@@ -536,7 +540,7 @@ async fn start_mdns_discovery(
     if let Some(ref server_state) = *server_state {
         // 使用已有的服务器状态启动 mDNS
         let mdns = discovery::MdnsDiscovery::with_server_state(server_state.clone())?;
-        mdns.register_service(app_handle.clone())?;
+        mdns.register_service(app_handle.clone(), device_id)?;
         mdns.start_browsing(app_handle)?;
 
         let _ = server_state;

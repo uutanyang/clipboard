@@ -41,7 +41,7 @@ impl MdnsDiscovery {
     }
 
     /// 注册 mDNS 服务，使本设备可被发现
-    pub fn register_service(&self, app_handle: AppHandle) -> Result<(), String> {
+    pub fn register_service(&self, app_handle: AppHandle, device_id: String) -> Result<(), String> {
         let hostname = hostname::get()
             .map_err(|e| format!("Failed to get hostname: {}", e))?
             .to_string_lossy()
@@ -59,6 +59,7 @@ impl MdnsDiscovery {
 
         // 创建 TXT 记录（包含端口信息和设备元数据）
         let txt_props = vec![
+            ("device_id".to_string(), device_id.clone()),
             ("hostname".to_string(), hostname.clone()),
             ("ip".to_string(), ip.clone()),
             ("port".to_string(), port.to_string()),
@@ -79,6 +80,7 @@ impl MdnsDiscovery {
             .map_err(|e| format!("Failed to register mDNS service: {}", e))?;
 
         println!("✓ mDNS service registered:");
+        println!("   Device ID: {}", device_id);
         println!("   Device: {}@{}", hostname, ip);
         println!("   Port: {}", port);
         println!("   Service: {}", SERVICE_TYPE);
@@ -88,6 +90,7 @@ impl MdnsDiscovery {
 
         // 发送自身信息到前端
         let device = NetworkDevice {
+            device_id: device_id.clone(),
             name: hostname.clone(),
             hostname: hostname.clone(),
             ip,
@@ -119,8 +122,14 @@ impl MdnsDiscovery {
                         let addresses = info.get_addresses();
                         let port = info.get_port();
 
+                        // 从 TXT 记录获取 device_id
+                        let device_id = info.get_property_val_str("device_id")
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| hostname.to_string());
+
                         if let Some(ip) = addresses.iter().next() {
                             let device = NetworkDevice {
+                                device_id,
                                 name: info.get_fullname().to_string(),
                                 hostname: hostname.to_string(),
                                 ip: ip.to_string(),
@@ -129,14 +138,15 @@ impl MdnsDiscovery {
                             };
 
                             println!("📱 Device discovered:");
+                            println!("   Device ID: {}", device.device_id);
                             println!("   Hostname: {}", device.hostname);
                             println!("   IP: {}", device.ip);
                             println!("   Port: {}", device.port);
 
-                            // 存储设备信息
+                            // 存储设备信息（使用 device_id 作为 key）
                             {
                                 let mut devices_map = devices.lock().unwrap();
-                                devices_map.insert(device.hostname.clone(), device.clone());
+                                devices_map.insert(device.device_id.clone(), device.clone());
                             }
 
                             // 发送事件到前端
@@ -153,7 +163,8 @@ impl MdnsDiscovery {
 
                         {
                             let mut devices_map = devices.lock().unwrap();
-                            devices_map.remove(hostname);
+                            // 需要找到对应的 device_id 来移除
+                            devices_map.retain(|_, d| d.hostname != hostname);
                         }
 
                         // 发送移除事件到前端
