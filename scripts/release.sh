@@ -54,17 +54,31 @@ fi
 # 1. 更新 package.json
 echo ""
 echo -e "${GREEN}[1/6] 更新 package.json...${NC}"
-npm version "$NEW_VERSION" --no-git-tag-version
+CURRENT_PKG_VERSION=$(node -p "require('./package.json').version")
+if [ "$CURRENT_PKG_VERSION" = "$NEW_VERSION" ]; then
+    echo -e "${YELLOW}package.json 版本已是 $NEW_VERSION，跳过更新${NC}"
+else
+    npm version "$NEW_VERSION" --no-git-tag-version
+fi
 
 # 2. 更新 Cargo.toml
 echo -e "${GREEN}[2/6] 更新 Cargo.toml...${NC}"
-sed -i.bak "s/^version = \".*\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
-rm -f src-tauri/Cargo.toml.bak
+CURRENT_CARGO_VERSION=$(grep '^version = ' src-tauri/Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+if [ "$CURRENT_CARGO_VERSION" = "$NEW_VERSION" ]; then
+    echo -e "${YELLOW}Cargo.toml 版本已是 $NEW_VERSION，跳过更新${NC}"
+else
+    sed -i.bak "s/^version = \".*\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
+    rm -f src-tauri/Cargo.toml.bak
+fi
 
 # 3. 提交更改
 echo -e "${GREEN}[3/6] 提交更改...${NC}"
-git add package.json package-lock.json src-tauri/Cargo.toml
-git commit -m "chore: bump version to $TAG"
+if git diff --quiet && git diff --cached --quiet; then
+    echo -e "${YELLOW}没有版本变更，跳过提交${NC}"
+else
+    git add package.json package-lock.json src-tauri/Cargo.toml src-tauri/Cargo.lock
+    git commit -m "chore: bump version to $TAG"
+fi
 
 # 4. 创建标签
 echo -e "${GREEN}[4/6] 创建 Git 标签...${NC}"
