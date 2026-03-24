@@ -7,18 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
 *.local
+
+# Test instances
 instance1
 instance2
-scripts
-src-tauri
-.vscode
-.github
-.codeartsdoer
 
+# Tauri build artifacts
+src-tauri/target
+
+# Database
 clipboard.db
 
 # Editor directories and files
@@ -31,5 +35,12 @@ clipboard.db
 *.njsproj
 *.sln
 *.sw?
-*.md
-*.sh
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
