@@ -5,162 +5,72 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version tag (e.g., v1.0.0)'
-        required: false
-        default: ''
 
 permissions:
   contents: write
 
 env:
   CARGO_TERM_COLOR: always
-  NODE_OPTIONS: --no-warnings
 
 jobs:
-  # ==================== macOS Build (Universal) ====================
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: universal-apple-darwin
+            rust-targets: x86_64-apple-darwin,aarch64-apple-darwin
+          - platform: windows-latest
+            target: ''
+            rust-targets: ''
+          - platform: ubuntu-22.04
+            target: ''
+            rust-targets: ''
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-apple-darwin,aarch64-apple-darwin
+          targets: ${{ matrix.rust-targets }}
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      - uses: swatinem/rust-cache@v2
 
-      - name: Install create-dmg
-        run: brew install create-dmg
-
-      - name: Install frontend dependencies
-        run: pnpm install
-
-      - name: Build Tauri app (Universal Binary)
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_NO_WARNINGS: 1
-        with:
-          tagName: ${{ github.ref_name || inputs.version }}
-          releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
-          releaseBody: |
-            ## 贴立方 ${{ github.ref_name || inputs.version }}
-            
-            ### 新功能
-            - Tab 分类功能（全部/文本/图片）
-            - 图片点击使用系统默认应用打开
-            - 列表按时间倒序排列
-            - 自动启动 mDNS 设备发现服务
-            - 托盘菜单优化
-            
-            ### 修复
-            - 修复托盘退出功能无效的问题
-            - 修复设备管理、文件传输菜单无法打开窗口的问题
-            
-            ---
-            **支持平台**: macOS (Intel/Apple Silicon), Windows, Linux
-          releaseDraft: true
-          prerelease: false
-          args: --target universal-apple-darwin
-
-  # ==================== Windows Build ====================
-  build-windows:
-    runs-on: windows-latest
-    needs: build-macos
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-
-      - name: Install frontend dependencies
-        run: pnpm install
-
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_NO_WARNINGS: 1
-        with:
-          tagName: ${{ github.ref_name || inputs.version }}
-          releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
-          releaseDraft: true
-          prerelease: false
-
-  # ==================== Linux Build ====================
-  build-linux:
-    runs-on: ubuntu-22.04
-    needs: build-windows
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-
-      - name: Install system dependencies
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libgtk-3-dev \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libssl-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
 
-      - name: Install frontend dependencies
-        run: pnpm install
+      - run: pnpm install
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_NO_WARNINGS: 1
         with:
-          tagName: ${{ github.ref_name || inputs.version }}
-          releaseName: '贴立方 ${{ github.ref_name || inputs.version }}'
+          tagName: ${{ github.ref_name }}
+          releaseName: '贴立方 ${{ github.ref_name }}'
+          releaseBody: |
+            ## 贴立方 ${{ github.ref_name }}
+
+            ### 功能
+            - Tab 分类（全部/文本/图片）
+            - 图片点击用系统默认应用打开
+            - 列表按时间倒序排列
+            - 自动启动 mDNS 设备发现服务
+
+            ### 支持
+            macOS (Intel/Apple Silicon), Windows, Linux
           releaseDraft: true
           prerelease: false
+          args: ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
