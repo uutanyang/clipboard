@@ -74,3 +74,57 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform }}
+          path: |
+            src-tauri/target/**/bundle/**/*.app
+            src-tauri/target/**/bundle/**/*.dmg
+            src-tauri/target/**/bundle/**/*.msi
+            src-tauri/target/**/bundle/**/*.exe
+            src-tauri/target/**/bundle/**/*.deb
+            src-tauri/target/**/bundle/**/*.AppImage
+          if-no-files-found: warn
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find artifacts -type f
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: '贴立方 ${{ github.ref_name }}'
+          body: |
+            ## 贴立方 ${{ github.ref_name }}
+
+            ### 功能
+            - Tab 分类（全部/文本/图片）
+            - 图片点击用系统默认应用打开
+            - 列表按时间倒序排列
+            - 自动启动 mDNS 设备发现服务
+
+            ### 支持
+            macOS (Intel/Apple Silicon), Windows, Linux
+          draft: true
+          prerelease: false
+          files: |
+            artifacts/**/*.app
+            artifacts/**/*.dmg
+            artifacts/**/*.msi
+            artifacts/**/*.exe
+            artifacts/**/*.deb
+            artifacts/**/*.AppImage
