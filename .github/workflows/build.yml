@@ -45,7 +45,7 @@ jobs:
         uses: swatinem/rust-cache@v2
 
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build Tauri app (Universal Binary)
         uses: tauri-apps/tauri-action@v0
@@ -100,7 +100,7 @@ jobs:
         uses: swatinem/rust-cache@v2
 
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
@@ -149,7 +149,7 @@ jobs:
             libssl-dev
 
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
